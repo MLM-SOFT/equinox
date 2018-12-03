@@ -1,6 +1,6 @@
 if (typeof get_fixtures !== 'function') {
   function get_fixtures() {
-    return {};
+    return [];
   }
 }
 var loaded_fixtures = [];

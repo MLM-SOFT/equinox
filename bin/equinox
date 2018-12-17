@@ -19,6 +19,9 @@ var yargs = require('yargs')
     .describe('reporter', 'Test reporter')
     .alias('r', 'reporter')
     .default('reporter', 'dot')
+    .alias('n', 'notices')
+    .describe('notices', 'Display notices')
+    .default('notices', false)
     ;
 
 var argv = yargs.argv;
@@ -70,11 +73,17 @@ if (argv.database === undefined) {
 }
 
 // try to connect to the database
-db.connect (argv.database, argv.host, argv.user, argv.password, argv.port, function (err) {
+db.connect (argv.database, argv.host, argv.user, argv.password, argv.port, function (err, client) {
   if (err) {
     console.log("ERROR: Unable to connect to database (" + err.toString() + ")");
     return;
   }
+
+  if (argv.notices)
+    client.on('notice', (msg) => {
+      if (msg.where)
+        console.warn(`${msg.toString()} at ${msg.where}`);
+    });
 
   db.query('CREATE SCHEMA IF NOT EXISTS equinox', function (err) {
     if (err) {

@@ -75,36 +75,45 @@ if (argv.database === undefined) {
 // try to connect to the database
 db.connect (argv.database, argv.host, argv.user, argv.password, argv.port, function (err, client) {
   if (err) {
-    console.log("ERROR: Unable to connect to database (" + err.toString() + ")");
+    console.error("ERROR: Unable to connect to database (" + err.toString() + ")");
     return;
   }
 
   if (argv.notices)
-    client.on('notice', (msg) => {
+    client.on('notice', function (msg) {
       if (msg.where)
-        console.warn(`${msg.toString()} at ${msg.where}`);
+        console.warn(msg.toString() + ' at ' + msg.where);
     });
 
   db.query('CREATE SCHEMA IF NOT EXISTS equinox', function (err) {
     if (err) {
-      console.log("ERROR: " + err);
+      console.error("ERROR: " + err);
       process.exit(1);
     }
 
     loader.load(files, function (err) {
       if (err) {
-        console.log("ERROR: " + err);
+        console.error("ERROR: " + err);
         process.exit(1);
       }
 
       // execute tests here
       runner(files, function (err, results) {
+        var rkeys = Object.keys(results);
+
+        for (var i = 0; i < rkeys.length; i++) {
+          if (results[rkeys[i]].error) {
+            console.error(results[rkeys[i]].error.detail + ' at ' + results[rkeys[i]].error.where);
+            process.exit(1);
+          }
+        }
+
         reporter(results);
 
         // drop the schema`
         db.query('DROP SCHEMA equinox CASCADE', function (err, res) {
           if (err) {
-            console.log("ERROR: " + err);
+            console.error("ERROR: " + err);
             process.exit(1);
           }
 

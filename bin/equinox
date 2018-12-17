@@ -103,7 +103,7 @@ db.connect (argv.database, argv.host, argv.user, argv.password, argv.port, funct
 
         for (var i = 0; i < rkeys.length; i++) {
           if (results[rkeys[i]].error) {
-            console.error(results[rkeys[i]].error.detail + ' at ' + results[rkeys[i]].error.where);
+            console.error(rkeys[i] + '\n\n' + results[rkeys[i]].error.detail + ' at ' + results[rkeys[i]].error.where);
             process.exit(1);
           }
         }
